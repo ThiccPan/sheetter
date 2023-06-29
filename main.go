@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -52,13 +53,33 @@ func main() {
 		}
 	}
 
-	writeRange := "A4:B"
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("input row:")
+	row, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	log.Println(row)
+
+	fmt.Println("input name:")
+	name, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println("input email:")
+	email, err := reader.ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+
+	writeRange := "A8:B"
 	writeData := [][]interface{}{
 		{
-			"user3",
+			name,
 		},
 		{
-			"user3@gmail.com",
+			email,
 		},
 	}
 
