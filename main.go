@@ -53,27 +53,30 @@ func main() {
 		}
 	}
 
-	reader := bufio.NewReader(os.Stdin)
+	scanner := bufio.NewScanner(os.Stdin)
 	fmt.Println("input row:")
-	row, err := reader.ReadString('\n')
+	scanner.Scan()
+	row := scanner.Text()
 	if err != nil {
 		panic(err)
 	}
 	log.Println(row)
 
 	fmt.Println("input name:")
-	name, err := reader.ReadString('\n')
+	scanner.Scan()
+	name := scanner.Text()
 	if err != nil {
 		panic(err)
 	}
 
 	fmt.Println("input email:")
-	email, err := reader.ReadString('\n')
+	scanner.Scan()
+	email := scanner.Text()
 	if err != nil {
 		panic(err)
 	}
 
-	writeRange := "A8:B"
+	writeRange := "A" + string(row[:]) + ":B"
 	writeData := [][]interface{}{
 		{
 			name,
