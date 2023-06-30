@@ -5,13 +5,14 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
+	"github.com/labstack/echo/v4"
 	gsheetConf "github.com/thiccpan/sheetter/config"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
-	
 )	
 
 func main() {
@@ -32,8 +33,18 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
-	ReadFromSheet(srv)
+	e := echo.New()
+	e.GET("/healthcheck", func(c echo.Context) error {
+		return c.JSON(http.StatusOK, "online")
+	})
 
+	e.GET("/sheet", func(c echo.Context) error {
+		ReadFromSheet(srv)
+		return nil
+	})
+	
+	e.Logger.Fatal(e.Start(":8000"))
+	
 	// scanner := bufio.NewScanner(os.Stdin)
 }
 
@@ -70,7 +81,7 @@ func WriteToSheet(scanner *bufio.Scanner, srv *sheets.Service) error {
 		Spreadsheets.
 		Values.
 		Update(
-			"18rlq5xu4YmxOmk3Xb-Nj6NbBygTeSKukq9EomNynvWI",
+			gsheetConf.SHEET_ID,
 			writeRange,
 			&writeValue,
 		).
@@ -87,7 +98,7 @@ func WriteToSheet(scanner *bufio.Scanner, srv *sheets.Service) error {
 
 func ReadFromSheet(srv *sheets.Service) error {
 	// Read from sheet with id below:
-	spreadsheetId := "18rlq5xu4YmxOmk3Xb-Nj6NbBygTeSKukq9EomNynvWI"
+	spreadsheetId := gsheetConf.SHEET_ID
 	readRange := "A1:C"
 	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
 	if err != nil {

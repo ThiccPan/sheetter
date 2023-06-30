@@ -11,6 +11,8 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const SHEET_ID = "18rlq5xu4YmxOmk3Xb-Nj6NbBygTeSKukq9EomNynvWI"
+
 // Retrieve a token, saves the token, then returns the generated client.
 func GetClient(config *oauth2.Config) *http.Client {
 	// The file token.json stores the user's access and refresh tokens, and is
