@@ -1,15 +1,16 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/labstack/echo/v4"
 	gsheetConf "github.com/thiccpan/sheetter/config"
+	"github.com/thiccpan/sheetter/internal/handler"
+	"github.com/thiccpan/sheetter/internal/usecase"
+	"github.com/thiccpan/sheetter/internal/usecase/webapi"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sheets/v4"
@@ -21,6 +22,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to read client secret file: %v", err)
 	}
+	
 	// If modifying these scopes, delete your previously saved token.json.
 	config, err := google.ConfigFromJSON(credentialByte, "https://www.googleapis.com/auth/spreadsheets")
 	if err != nil {
@@ -33,88 +35,16 @@ func main() {
 		log.Fatalf("Unable to retrieve Sheets client: %v", err)
 	}
 
+	userUsecase := usecase.NewUserUsecase(*webapi.NewSheetApi(srv, gsheetConf.SHEET_ID))
+
 	e := echo.New()
 	e.GET("/healthcheck", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, "online")
 	})
 
-	e.GET("/sheet", func(c echo.Context) error {
-		ReadFromSheet(srv)
-		return nil
-	})
+	handler.NewUserRoute(e, userUsecase)
 	
 	e.Logger.Fatal(e.Start(":8000"))
 	
 	// scanner := bufio.NewScanner(os.Stdin)
-}
-
-func WriteToSheet(scanner *bufio.Scanner, srv *sheets.Service) error {
-	fmt.Println("input row:")
-	scanner.Scan()
-	row := scanner.Text()
-	log.Println(row)
-
-	fmt.Println("input name:")
-	scanner.Scan()
-	name := scanner.Text()
-
-	fmt.Println("input email:")
-	scanner.Scan()
-	email := scanner.Text()
-
-	writeRange := "A" + string(row[:]) + ":B"
-	writeData := [][]interface{}{
-		{
-			name,
-		},
-		{
-			email,
-		},
-	}
-
-	writeValue := sheets.ValueRange{
-		MajorDimension: "COLUMNS",
-		Values: writeData,
-	}
-
-	writeReq := srv.
-		Spreadsheets.
-		Values.
-		Update(
-			gsheetConf.SHEET_ID,
-			writeRange,
-			&writeValue,
-		).
-		ValueInputOption("RAW")
-
-	writeRes, err := writeReq.Do()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	fmt.Println(writeRes.UpdatedData)
-	return nil
-}
-
-func ReadFromSheet(srv *sheets.Service) error {
-	// Read from sheet with id below:
-	spreadsheetId := gsheetConf.SHEET_ID
-	readRange := "A1:C"
-	resp, err := srv.Spreadsheets.Values.Get(spreadsheetId, readRange).Do()
-	if err != nil {
-		log.Fatalf("Unable to retrieve data from sheet: %v", err)
-	}
-
-	if len(resp.Values) == 0 {
-		fmt.Println("No data found.")
-	} else {
-		for _, row := range resp.Values {
-			for _, v := range row {
-				fmt.Printf("%s ", v)
-			}
-			fmt.Println()
-		}
-	}
-
-	return nil
 }
