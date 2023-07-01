@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
+	"github.com/thiccpan/sheetter/internal/entity"
 	"github.com/thiccpan/sheetter/internal/usecase"
 )
 
@@ -23,22 +24,61 @@ func NewSheetHandler(u usecase.UserUsecase) UserHandler {
 }
 
 func (uh *userHandler) GetSheetData(c echo.Context) error {
-	data, err := uh.uu.GetAllData()
+	data, err := uh.uu.GetAllData(c.Request().Context())
 	if err != nil {
 		return c.JSON(
-			http.StatusInternalServerError, 
+			http.StatusInternalServerError,
 			map[string]interface{}{
 				"error": err.Error(),
 			})
 	}
 
 	return c.JSON(
-		http.StatusInternalServerError, 
+		http.StatusOK,
 		map[string]interface{}{
-			"data": data,
+			"message": "get sheet data successfull",
+			"data":    data,
 		})
 }
 
 func (uh *userHandler) CreateSheetData(c echo.Context) error {
-	return c.JSON(http.StatusOK, "data")
+	request := UserReq{}
+	err := c.Bind(&request)
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			map[string]interface{}{
+				"error": err.Error(),
+			})
+	}
+
+	data, err := uh.uu.CreateData(
+		c.Request().Context(),
+		entity.User{
+			Name:        request.Name,
+			Email:       request.Email,
+			IsContacted: false,
+			Row:         request.Row,
+		})
+
+	if err != nil {
+		return c.JSON(
+			http.StatusInternalServerError,
+			map[string]interface{}{
+				"error": err.Error(),
+			})
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		map[string]interface{}{
+			"message": "data created successfully",
+			"data":    data,
+		})
+}
+
+type UserReq struct {
+	Name  string `json:"name"`
+	Email string `json:"email"`
+	Row   int    `json:"row"`
 }

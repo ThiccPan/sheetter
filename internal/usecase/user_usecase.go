@@ -1,6 +1,8 @@
 package usecase
 
 import (
+	"context"
+
 	"github.com/thiccpan/sheetter/internal/entity"
 	"github.com/thiccpan/sheetter/internal/usecase/webapi"
 )
@@ -15,7 +17,15 @@ func NewUserUsecase(sa webapi.SheetApi) UserUsecase {
 	}
 }
 
-func (uu *userUsecase) GetAllData() ([]entity.User, error) {
+func (uu *userUsecase) GetAllData(ctx context.Context) ([]entity.User, error) {
 	data, err := uu.sheetApi.ReadFromSheet()
 	return data, err
+}
+
+func (uu *userUsecase) CreateData(ctx context.Context, data entity.User) (entity.User, error) {
+	err := uu.sheetApi.WriteToRow(data)
+	if err != nil {
+		return entity.User{}, err
+	}
+	return data, nil	
 }
