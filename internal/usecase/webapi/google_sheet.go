@@ -15,26 +15,20 @@ type SheetApi struct {
 
 func NewSheetApi(srv *sheets.Service, sheetId string) *SheetApi {
 	return &SheetApi{
-		srv: srv,
+		srv:     srv,
 		sheetId: sheetId,
 	}
 }
 
 func (sa *SheetApi) WriteToRow(user entity.User) error {
-
 	writeRange := "A" + fmt.Sprint(user.Row) + ":B"
-	writeData := [][]interface{}{
-		{
-			user.Name,
-		},
-		{
-			user.Email,
-		},
-	}
 
 	writeValue := sheets.ValueRange{
 		MajorDimension: "COLUMNS",
-		Values:         writeData,
+		Values: [][]interface{}{
+			{user.Name},
+			{user.Email},
+		},
 	}
 
 	writeReq := sa.srv.
@@ -70,9 +64,9 @@ func (sa *SheetApi) ReadFromSheet() ([]entity.User, error) {
 		if len(row) == 0 {
 			break
 		}
-		
+
 		data = append(data, entity.User{
-			Name: row[0].(string),
+			Name:  row[0].(string),
 			Email: row[1].(string),
 		})
 	}
