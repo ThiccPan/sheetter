@@ -8,4 +8,5 @@ import (
 func NewUserRoute(router *echo.Echo, uu usecase.UserUsecase) {
 	userHandler := NewSheetHandler(uu)
 	router.GET("/users/data", userHandler.GetSheetData)
+	router.POST("/users/data", userHandler.CreateSheetData)
 }
