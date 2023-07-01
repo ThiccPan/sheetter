@@ -1,7 +1,12 @@
 package usecase
 
-import "github.com/thiccpan/sheetter/internal/entity"
+import (
+	"context"
+
+	"github.com/thiccpan/sheetter/internal/entity"
+)
 
 type UserUsecase interface {
-	GetAllData() ([]entity.User, error)
+	GetAllData(ctx context.Context) ([]entity.User, error)
+	CreateData(ctx context.Context, data entity.User) (entity.User, error)
 }
