@@ -60,7 +60,7 @@ func (sa *SheetApi) ReadFromSheet() ([]entity.User, error) {
 	}
 
 	data := []entity.User{}
-	for _, row := range resp.Values {
+	for idx, row := range resp.Values {
 		if len(row) == 0 {
 			break
 		}
@@ -68,6 +68,7 @@ func (sa *SheetApi) ReadFromSheet() ([]entity.User, error) {
 		data = append(data, entity.User{
 			Name:  row[0].(string),
 			Email: row[1].(string),
+			Row:   idx,
 		})
 	}
 
