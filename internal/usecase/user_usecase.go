@@ -5,10 +5,6 @@ import (
 	"github.com/thiccpan/sheetter/internal/usecase/webapi"
 )
 
-type UserUsecase interface {
-	GetAllData() ([]entity.User, error)
-}
-
 type userUsecase struct {
 	sheetApi webapi.SheetApi
 }
